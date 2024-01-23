@@ -11,7 +11,7 @@ $ source .venv/bin/activate
 2. Install dependencies
 
 ```console
-$ pip3 install -r requirements.txt
+$ pip3 install -r requirements.txt --extra-index-url https://test.pypi.org/simple
 ```
 
 3. Install `daxa_langchain` python package. You can download this package from your Daxa dashboard Profile at the top right hand corner, `API Key & Packages` page
