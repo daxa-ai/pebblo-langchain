@@ -46,6 +46,7 @@ class PebbloSafeLoader(BaseLoader):
         loader_name = str(type(self.loader)).split(".")[-1].split("'")[0]
         self.source_type = get_loader_type(loader_name)
         self.source_size = self.get_source_size(self.source_path)
+        self.source_size_aggr = 0
         self.loader_details = {
             "loader": loader_name,
             "source_path": self.source_path,
@@ -98,10 +99,12 @@ class PebbloSafeLoader(BaseLoader):
         for doc in doc_content:
             doc_source_path = get_full_path(doc.get("metadata", {}).get("source"))
             doc_source_owner = PebbloSafeLoader.get_file_owner_from_path(doc_source_path)
-            doc_source_size = self.get_source_size(doc_source_path)
+            page_content = doc.get("page_content")
+            doc_source_size = self.calculate_content_size(page_content)
+            self.source_size_aggr += doc_source_size
             docs.append(
                 {
-                    "doc": doc.get("page_content"),
+                    "doc": page_content,
                     "source_path": doc_source_path,
                     "last_modified": doc.get("metadata", {}).get("last_modified"),
                     "file_owner": doc_source_owner,
@@ -120,6 +123,7 @@ class PebbloSafeLoader(BaseLoader):
         }
         if loading_end is True:
             payload["loading_end"] = "true"
+            payload["loader_details"]["source_size_aggr"] = self.source_size_aggr
         try:
             payload = Doc.model_validate(payload).model_dump(exclude_unset=True)
         except AttributeError:
@@ -153,6 +157,19 @@ class PebbloSafeLoader(BaseLoader):
             logger.warning(f"An Exception caught in _send_loader_doc: {e}")
         if loading_end is True:
             PebbloSafeLoader.set_loader_sent()
+
+    @staticmethod
+    def calculate_content_size(page_content):
+        """
+        Calculate the content size in bytes:
+        - Encode the string to bytes using a specific encoding (e.g., UTF-8)
+        - Get the length of the encoded bytes.
+        """
+
+        # Encode the content to bytes using UTF-8
+        encoded_content = page_content.encode('utf-8')
+        size = len(encoded_content)
+        return size
 
     def _send_discover(self):
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
