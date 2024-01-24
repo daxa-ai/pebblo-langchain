@@ -99,9 +99,10 @@ class PebbloSafeLoader(BaseLoader):
         for doc in doc_content:
             doc_source_path = get_full_path(doc.get("metadata", {}).get("source"))
             doc_source_owner = PebbloSafeLoader.get_file_owner_from_path(doc_source_path)
+            doc_source_size = self.get_source_size(doc_source_path)
             page_content = doc.get("page_content")
-            doc_source_size = self.calculate_content_size(page_content)
-            self.source_aggr_size += doc_source_size
+            page_content_size = self.calculate_content_size(page_content)
+            self.source_aggr_size += page_content_size
             docs.append(
                 {
                     "doc": page_content,
