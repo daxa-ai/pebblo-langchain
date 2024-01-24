@@ -68,7 +68,7 @@ class PebbloSafeLoader(BaseLoader):
         try:
             doc_iterator = self.loader.lazy_load()
         except NotImplementedError as exc:
-            err_str = f"{self.__class__.__name__} does not implement lazy_load()"
+            err_str = f"{self.loader.__class__.__name__} does not implement lazy_load()"
             logger.error(err_str)
             raise NotImplementedError(err_str) from exc
         while True:
@@ -120,7 +120,7 @@ class PebbloSafeLoader(BaseLoader):
             "load_id": self.load_id,
             "loader_details": self.loader_details,
             "loading_end": "false",
-            "file_owner": self.source_owner,
+            "source_owner": self.source_owner,
         }
         if loading_end is True:
             payload["loading_end"] = "true"
@@ -151,11 +151,9 @@ class PebbloSafeLoader(BaseLoader):
                 body {resp.json()}\n"
             )
         except requests.exceptions.RequestException as e:
-            logger.debug(
-                f"An exception caught during api request:{e}, url: {load_doc_url}."
-            )
+            logger.debug("Unable to reach pebblo server.")
         except Exception as e:
-            logger.warning(f"An Exception caught in _send_loader_doc: {e}")
+            logger.warning(f"An Exception caught in _send_loader_doc.")
         if loading_end is True:
             PebbloSafeLoader.set_loader_sent()
 
@@ -200,12 +198,10 @@ class PebbloSafeLoader(BaseLoader):
                 logger.debug(
                     f"Received unexpected HTTP response code: {resp.status_code}"
                 )
-        except requests.exceptions.RequestException as e:
-            logger.warning(
-                f"An exception caught during api request:{e}, url: {app_discover_url}."
-            )
+        except requests.exceptions.RequestException:
+            logger.warning("Unable to reach pebblo server.")
         except Exception as e:
-            logger.warning(f"An Exception caught in _send_discover: {e}")
+            logger.warning(f"An Exception caught in _send_discover.")
 
     def _get_app_details(self):
         framework, runtime = get_runtime()
