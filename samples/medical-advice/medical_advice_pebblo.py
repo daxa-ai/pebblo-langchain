@@ -1,9 +1,9 @@
 from langchain.chains import RetrievalQA
-from langchain_community.document_loaders import UnstructuredPDFLoader
+from langchain.document_loaders import UnstructuredPDFLoader
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_openai.llms import OpenAI
 from langchain.schema import Document
-from langchain_community.vectorstores import Chroma
+from langchain.vectorstores import Chroma
 from langchain.vectorstores.utils import filter_complex_metadata
 from typing import List
 
